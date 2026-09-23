@@ -57,16 +57,23 @@ export default function JobsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as JobApplication[];
-        if (Array.isArray(parsed)) setApps(parsed);
+    let cancelled = false;
+    window.setTimeout(() => {
+      if (cancelled) return;
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw) as JobApplication[];
+          if (Array.isArray(parsed)) setApps(parsed);
+        }
+      } catch {
+        /* corrupted storage -> start fresh */
       }
-    } catch {
-      /* corrupted storage -> start fresh */
-    }
-    setLoaded(true);
+      setLoaded(true);
+    }, 0);
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {

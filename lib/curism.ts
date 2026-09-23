@@ -102,8 +102,6 @@ export const defaultSignals = (meta: {
   descriptionLen: meta.description?.length ?? 0,
 });
 
-const README_TOPICS = ["payment", "stripe", "streaming", "video", "rtmp", "auth", "oauth", "identity", "mobile", "android", "ios", "security", "ids", "nids", "infra", "kubernetes", "terraform", "cloud", "microservices", "event", "queue", "redis", "ai", "ml", "llm", "langchain", "mlops", "react native", "flutter"];
-
 function crossDomainBoost(s: RepoSignals): number {
   const text = `${s.language ?? ""} ${s.description ?? ""}`.toLowerCase();
   let boost = 0;

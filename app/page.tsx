@@ -100,9 +100,11 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    if (searchKey) {
+    if (!searchKey) return;
+    const timer = window.setTimeout(() => {
       void runScan(searchKey);
-    }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [searchKey, runScan]);
 
   useEffect(() => {

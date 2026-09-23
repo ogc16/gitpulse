@@ -1,7 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { Link as LinkIcon, Briefcase, Sun, Moon } from "lucide-react";
+
+type Theme = "dark" | "light";
+
+const themeListeners = new Set<() => void>();
+const subscribeTheme = (onStoreChange: () => void) => {
+  themeListeners.add(onStoreChange);
+  return () => {
+    themeListeners.delete(onStoreChange);
+  };
+};
+const getThemeSnapshot = (): Theme =>
+  document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+const getServerThemeSnapshot = (): Theme => "dark";
 
 function GithubBrandIcon({ className }: { className?: string }) {
   return (
@@ -13,11 +27,7 @@ function GithubBrandIcon({ className }: { className?: string }) {
 
 export default function Header({ active }: { active: "scan" | "jobs" }) {
   const [copied, setCopied] = useState(false);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
-
-  useEffect(() => {
-    setTheme(document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark");
-  }, []);
+  const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, getServerThemeSnapshot);
 
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -26,18 +36,18 @@ export default function Header({ active }: { active: "scan" | "jobs" }) {
   };
 
   const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
+    const next: Theme = theme === "dark" ? "light" : "dark";
     document.documentElement.toggleAttribute("data-theme", next === "light");
     try {
       localStorage.setItem("gp-theme", next);
     } catch {
       /* ignore */
     }
-    setTheme(next);
+    themeListeners.forEach((listener) => listener());
   };
 
   const navItem = (href: string, label: string, icon: React.ReactNode, key: "scan" | "jobs") => (
-    <a
+    <Link
       href={href}
       className={`group relative flex items-center gap-2 px-3.5 py-2 text-xs font-medium transition ${
         active === key ? "text-white" : "text-slate-400 hover:text-slate-200"
@@ -49,7 +59,7 @@ export default function Header({ active }: { active: "scan" | "jobs" }) {
         <span className="absolute inset-x-2.5 -bottom-px h-px bg-gradient-to-r from-transparent via-green-400/70 to-transparent" />
       )}
       {active === key && <span className="w-1.5 h-1.5 rounded-full bg-green-400 ml-0.5" aria-hidden="true" />}
-    </a>
+    </Link>
   );
 
   return (
@@ -62,12 +72,12 @@ export default function Header({ active }: { active: "scan" | "jobs" }) {
             </div>
           </div>
           <div className="flex items-baseline gap-2.5">
-            <a
+            <Link
               href="/"
               className="font-bold text-[15px] tracking-tight text-white hover:text-green-300 transition-colors"
             >
               GitPulse
-            </a>
+            </Link>
             <span className="hidden sm:inline text-xs text-slate-500 font-light tracking-tight">
               Profile Intelligence
             </span>

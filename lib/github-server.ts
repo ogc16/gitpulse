@@ -1,5 +1,5 @@
 import { defaultSignals, scoreRepo, RepoSignals, CurismRepoScore } from "./curism";
-import { classifyPaths, README_RE } from "./tree-classify";
+import { classifyPaths } from "./tree-classify";
 
 export const API = "https://api.github.com";
 export const RAW = "https://raw.githubusercontent.com";

@@ -95,7 +95,7 @@ export default function CurismPanel({
   const dimensionRows: { key: CurismKey; value: number; grade: string }[] = CURISM_ORDER.map((key) => ({
     key,
     value: o[key],
-    grade: stageGrade(o[key], key),
+    grade: stageGrade(o[key]),
   }));
 
   return (
@@ -225,7 +225,7 @@ function RepoRow({ repo }: { repo: ProfileCurism["repos"][number] }) {
   );
 }
 
-function stageGrade(value: number, key: string): string {
+function stageGrade(value: number): string {
   if (value >= 89.1) return "S+";
   if (value >= 73.4) return "S";
   if (value >= 58.9) return "A";
