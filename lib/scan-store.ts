@@ -37,14 +37,14 @@ export function getScan(user: string): ScanEntry {
   return entry;
 }
 
-export function getFreshScan(user: string): ScanResult | null {
-  const entry = getScan(user);
+export function getFreshScan(key: string): ScanResult | null {
+  const entry = getScan(key);
   if (entry.data && Date.now() - entry.cachedAt < TTL) return entry.data;
   return null;
 }
 
-export function setScanResult(user: string, data: ScanResult) {
-  const entry = getScan(user);
+export function setScanResult(key: string, data: ScanResult) {
+  const entry = getScan(key);
   entry.data = data;
   entry.cachedAt = Date.now();
   entry.progress = null;

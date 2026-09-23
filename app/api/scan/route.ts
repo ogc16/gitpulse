@@ -17,7 +17,11 @@ import { getFreshScan, setScanResult, setProgress, ScanResult } from "@/lib/scan
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const normalizeUser = (u: string) => u.trim().replace(/^@/, "").replace(/https?:\/\/github\.com\//, "");
+const normalizeUser = (u: string) =>
+  u
+    .trim()
+    .replace(/^@/, "")
+    .replace(/https?:\/\/github\.com\//, "");
 
 const USER_FIELDS: (keyof RawGitHubUser)[] = [
   "login",
@@ -93,16 +97,18 @@ export async function runApiScan(user: string, limit: number): Promise<ScanResul
       current: repo.name,
       limit,
     });
-    try {
-      analyzedScores.push(await scanRepo(repo));
-    } catch (err) {
-      if (err instanceof RateLimitError) {
-        rateLimited = true;
-        analyzedScores.push(await scanRepoMetadataOnly(repo));
-        break;
+    let score;
+    if (rateLimited) {
+      score = await scanRepoMetadataOnly(repo);
+    } else {
+      try {
+        score = await scanRepo(repo);
+      } catch (err) {
+        if (err instanceof RateLimitError) rateLimited = true;
+        score = await scanRepoMetadataOnly(repo);
       }
-      analyzedScores.push(await scanRepoMetadataOnly(repo));
     }
+    analyzedScores.push(score);
   }
 
   const metadataScores = [];
@@ -141,8 +147,10 @@ export async function GET(req: NextRequest) {
   const limitRaw = Number(req.nextUrl.searchParams.get("limit"));
   const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(30, Math.round(limitRaw))) : 15;
   const mode = req.nextUrl.searchParams.get("mode") ?? "auto";
+  const forceRefresh = req.nextUrl.searchParams.get("refresh") === "1";
+  const scanKey = `${user}|${limit}|${mode}`;
 
-  const cached = getFreshScan(user);
+  const cached = forceRefresh ? null : getFreshScan(scanKey);
   if (cached) {
     return Response.json({ ...cached, cached: true });
   }
@@ -164,7 +172,7 @@ export async function GET(req: NextRequest) {
         }
       }
     }
-    setScanResult(user, result);
+    setScanResult(scanKey, result);
     return Response.json(result);
   } catch (err) {
     setProgress(user, { user, phase: "error", completed: 0, total: 0, current: null, limit });
@@ -173,10 +181,16 @@ export async function GET(req: NextRequest) {
     }
     if (err instanceof RateLimitError) {
       return Response.json(
-        { error: "GitHub pages are temporarily refusing requests (429). Try again in a few minutes." },
+        {
+          error:
+            "GitHub pages are temporarily refusing requests (429). Try again in a few minutes.",
+        },
         { status: 429 },
       );
     }
-    return Response.json({ error: err instanceof Error ? err.message : "Scan failed unexpectedly." }, { status: 500 });
+    return Response.json(
+      { error: err instanceof Error ? err.message : "Scan failed unexpectedly." },
+      { status: 500 },
+    );
   }
 }
