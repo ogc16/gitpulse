@@ -11,33 +11,66 @@ fallback) in one place.
 ```mermaid
 flowchart LR
     subgraph Client
-        P[app/page.tsx]
-        J[app/jobs/page.tsx]
-        H[components/Header.tsx]
-        C[components/CurismPanel.tsx]
+        P["app/page.tsx — scanner UI"]
+        J["app/jobs/page.tsx — job tracker"]
+        H["components/Header.tsx — nav + theme"]
+        C["components/CurismPanel.tsx — CURISM render"]
     end
 
     subgraph Server (Next.js Route Handlers)
-        S[GET /api/scan]
-        R[GET /api/scan/progress]
+        S["app/api/scan/route.ts — orchestrator"]
+        R["app/api/scan/progress/route.ts"]
+    end
+
+    subgraph lib (scan + scoring)
+        GS["lib/github-server.ts — REST API"]
+        GH["lib/github-html.ts — HTML + codeload"]
+        TC["lib/tree-classify.ts — paths → signals"]
+        CU["lib/curism.ts — CURISM scoring"]
+        SS["lib/scan-store.ts — cache + progress"]
+        JO["lib/jobs.ts — tracker model + CSV"]
     end
 
     subgraph GitHub
-        API[REST API api.github.com]
-        RAW[raw.githubusercontent.com]
-        WEB[github.com HTML]
-        ZIP[codeload.github.com zips]
+        API["REST api.github.com"]
+        RAW["raw.githubusercontent.com"]
+        WEB["github.com HTML"]
+        ZIP["codeload.github.com zips"]
     end
 
     P --> S
     P --> R
-    S -->|primary| API
-    S -.->|403 / quota exhausted| WEB
-    S -.->|repo pages| WEB
-    S -.->|source archives| ZIP
-    S -.->|readme files| RAW
     C --> P
-    J --> H
+    J --> JO
+
+    S -->|primary path| GS
+    S -.->|403 / quota exhausted| GH
+    S --> R
+
+    GS -->|tree + readme| API
+    GS -.->|rate-limit fallback| GH
+    GH -.->|repo pages| WEB
+    GH -.->|source archives| ZIP
+    GH -.->|readme files| RAW
+
+    GS --> TC
+    GH --> TC
+    TC --> CU
+    GS --> SS
+    GH --> SS
+
+    click P "https://github.com/ogc16/gitpulse/blob/main/app/page.tsx"
+    click J "https://github.com/ogc16/gitpulse/blob/main/app/jobs/page.tsx"
+    click H "https://github.com/ogc16/gitpulse/blob/main/components/Header.tsx"
+    click C "https://github.com/ogc16/gitpulse/blob/main/components/CurismPanel.tsx"
+    click S "https://github.com/ogc16/gitpulse/blob/main/app/api/scan/route.ts"
+    click R "https://github.com/ogc16/gitpulse/blob/main/app/api/scan/progress/route.ts"
+    click GS "https://github.com/ogc16/gitpulse/blob/main/lib/github-server.ts"
+    click GH "https://github.com/ogc16/gitpulse/blob/main/lib/github-html.ts"
+    click TC "https://github.com/ogc16/gitpulse/blob/main/lib/tree-classify.ts"
+    click CU "https://github.com/ogc16/gitpulse/blob/main/lib/curism.ts"
+    click SS "https://github.com/ogc16/gitpulse/blob/main/lib/scan-store.ts"
+    click JO "https://github.com/ogc16/gitpulse/blob/main/lib/jobs.ts"
 ```
 
 ## Request lifecycle (`GET /api/scan`)
