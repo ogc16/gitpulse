@@ -234,7 +234,7 @@ export default function Page() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search GitHub username (e.g. ogc16, torvalds, gaearon)..."
+                placeholder="Search GitHub username (e.g. ogc16, torvalds, github, google, microsoft)..."
                 className="field rounded-xl pl-12 pr-28 py-3.5 text-sm"
               />
               <button
@@ -250,7 +250,7 @@ export default function Page() {
           {/* Quick Tags */}
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs">
             <span className="micro mr-1">Quick access</span>
-            {["ogc16", "torvalds", "gaearon", "octocat"].map((tag) => (
+            {["ogc16", "torvalds", "github", "google", "microsoft"].map((tag) => (
               <button
                 key={tag}
                 onClick={() => {
