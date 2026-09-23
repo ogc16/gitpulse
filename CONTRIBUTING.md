@@ -39,9 +39,11 @@ app/                 # App Router: / (scanner), /jobs (tracker), api/scan routes
 components/          # CurismPanel, Header
 lib/                 # github-server (REST), github-html (HTML fallback),
                      # tree-classify (path signals), curism (scoring), jobs (tracker)
+docs/                # ARCHITECTURE.md — system design, scan pipeline
+scripts/             # verify.mjs — lint + typecheck + tests + build in one pass
 ```
 
-A deeper walkthrough lives in [ARCHITECTURE.md](ARCHITECTURE.md).
+A deeper walkthrough lives in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Adding a new scan signal
 

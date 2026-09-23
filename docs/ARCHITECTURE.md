@@ -218,5 +218,5 @@ gitpulse/
 │  ├─ curism.ts · github.ts · github-server.ts · github-html.ts
 │  ├─ tree-classify.ts · scan-store.ts · jobs.ts
 ├─ next.config.ts · package.json · tsconfig.json
-└─ README.md · ARCHITECTURE.md · CONTRIBUTING.md · CODE_OF_CONDUCT.md · LICENSE
+└─ README.md · docs/ARCHITECTURE.md · CONTRIBUTING.md · CODE_OF_CONDUCT.md · LICENSE
 ```

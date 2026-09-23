@@ -61,6 +61,8 @@ npm install
 npm run dev        # http://localhost:3000
 npm test           # vitest — 49 tests across 5 suites
 npm run build      # production build (type-check + lint + bundle)
+npm run verify     # lint + typecheck + tests + build in one command
+npm run format     # prettier formatting
 ```
 
 Enter any GitHub handle and hit **Scan**. The dashboard renders the CURISM©
@@ -84,9 +86,10 @@ GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
 
 ## API
 
-- `GET /api/scan?user=<handle>&limit=15&mode=auto` — runs (or serves cached) scan; returns `{ mode, profile, userData, reposData, tip }`. `mode` is `auto` (API → HTML fallback), `api`, or `html`.
+- `GET /api/scan?user=<handle>&limit=15&mode=auto` — runs (or serves cached) scan; returns `{ mode, profile, userData, reposData, tip }`. `mode` is `auto` (API → HTML fallback), `api`, or `html`. Only the top `limit` repos (sorted by stars → size → updated) are deep-scanned; the rest are scored from metadata. Raise `limit` (max 30) for big profiles, e.g. `?user=ogc16&limit=30`.
 - `GET /api/scan/progress?user=<handle>` — `{ running, phase, completed, total, current }`.
-- `GET /api/scan?user=<handle>&mode=html` — force the quota-free HTML fallback.
+- `GET /api/scan?user=<handle>&mode=html` — force the quota-free HTML fallback (deep-scans every repo from source archives, no token needed).
+- `GET /api/scan?user=<handle>&refresh=1` — bypass the 15-min in-memory cache and force a fresh scan.
 
 ### Sample response
 
@@ -158,7 +161,7 @@ Follow these guardrails on your own repos:
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, code standards, and how to add
-a new scan signal. Architectural context lives in [ARCHITECTURE.md](ARCHITECTURE.md).
+a new scan signal. Architectural context lives in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Tech
 
@@ -166,7 +169,7 @@ Next.js 16 (App Router, Turbopack) · React 19 · Tailwind CSS v4 · lucide-reac
 
 ## Documentation
 
-- [Architecture](ARCHITECTURE.md) — system design, module map, scan pipeline, developer resources
+- [Architecture](docs/ARCHITECTURE.md) — system design, module map, scan pipeline, developer resources
 - [Contributing](CONTRIBUTING.md) — setup, coding standards, how to add a scan signal
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 
